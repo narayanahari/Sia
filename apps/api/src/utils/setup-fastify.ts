@@ -133,6 +133,10 @@ export async function setupFastify(
     async (req: FastifyRequest, body: string) => {
       // Store raw body for signature verification
       (req as FastifyRequest & { rawBody?: string }).rawBody = body;
+      // Handle empty bodies gracefully
+      if (!body || body.trim() === '') {
+        return undefined;
+      }
       // Parse and return JSON
       try {
         return JSON.parse(body);

@@ -111,6 +111,7 @@ export const jobs = pgTable(
     priority: jobPriorityEnum('priority').notNull().default('medium'),
     orderInQueue: integer('order_in_queue').notNull().default(-1),
     queueType: queueTypeEnum('queue_type'),
+    agentId: varchar('agent_id', { length: 255 }),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -169,6 +170,7 @@ export const jobs = pgTable(
       table.queueType,
       table.orderInQueue
     ),
+    index('jobs_agent_id_idx').on(table.agentId),
   ]
 );
 
@@ -259,6 +261,7 @@ export const activities = pgTable(
     orgId: varchar('org_id', { length: 255 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(), // Short title like "Job Created", "Job Updated", etc.
     jobId: varchar('job_id', { length: 255 }).notNull(),
+    agentId: varchar('agent_id', { length: 255 }),
     summary: varchar('summary', { length: 2000 }).notNull(), // Descriptive summary with all details
     createdBy: varchar('created_by', { length: 255 }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
@@ -275,6 +278,7 @@ export const activities = pgTable(
   (table: any) => [
     index('activities_job_id_idx').on(table.jobId),
     index('activities_org_id_idx').on(table.orgId),
+    index('activities_agent_id_idx').on(table.agentId),
   ]
 );
 
@@ -425,6 +429,7 @@ export const agents = pgTable(
     vibeAgentExecutablePath: varchar('vibe_agent_executable_path', {
       length: 500,
     }),
+    vibeConnectionId: uuid('vibe_connection_id'),
     lastActive: timestamp('last_active', { withTimezone: true }),
     consecutiveFailures: integer('consecutive_failures').notNull().default(0),
     registeredAt: timestamp('registered_at', { withTimezone: true }),
@@ -443,6 +448,7 @@ export const agents = pgTable(
     index('agents_org_id_idx').on(table.orgId),
     index('agents_status_idx').on(table.status),
     index('agents_org_host_idx').on(table.orgId, table.host),
+    index('agents_vibe_connection_id_idx').on(table.vibeConnectionId),
   ]
 );
 

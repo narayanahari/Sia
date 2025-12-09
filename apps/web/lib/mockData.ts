@@ -271,7 +271,7 @@ export const supportedIntegrations: Integration[] = [
   },
   {
     id: 'cursor',
-    name: 'Cursor',
+    name: 'Cursor Headless CLI',
     description: 'Connect Cursor to enable AI-powered code generation',
     status: 'disconnected',
     icon: 'cursor',

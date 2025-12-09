@@ -4,7 +4,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node --require @swc-node/register src/main.ts",
+        "command": "npx tsx watch src/main.ts",
         "cwd": "apps/api"
       },
       "cache": false

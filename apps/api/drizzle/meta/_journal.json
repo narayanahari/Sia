@@ -113,6 +113,13 @@
       "when": 1764919642884,
       "tag": "0015_updated_job_logs_column",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1765279830854,
+      "tag": "0016_added_vibe_connection_column_to_agents",
+      "breakpoints": true
     }
   ]
 }

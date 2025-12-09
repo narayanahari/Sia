@@ -93,6 +93,129 @@ sequenceDiagram
     end
 ```
 
+### Simplified Queue Monitor Flow
+
+The queue monitor workflow has been simplified to use only 2 activities:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Temporal Schedule (Every 1 min)              │
+│                    queue-schedule-{agentId}                     │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              Queue Monitor Workflow Triggered                   │
+│                  (Single Workflow)                              │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+                    ┌────────────────┐
+                    │ preprocessActivity│
+                    │ - Check orphans │
+                    │ - Heartbeat if  │
+                    │   job in progress│
+                    │ - Get next job  │
+                    └────────┬────────┘
+                             │
+                    ┌────────┴────────┐
+                    │                 │
+                Job Found          No Job
+                    │                 │
+                    ▼                 ▼
+         ┌──────────────────┐  ┌──────────┐
+         │ executeChild     │  │  Exit    │
+         │ (Job Execution)  │  └──────────┘
+         └──────────────────┘
+```
+
+### Agent Reconnect Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              User Clicks "Reconnect" in UI                      │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│         POST /agents/:id/reconnect API Called                   │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+                    ┌────────────────┐
+                    │  Ping Agent    │
+                    │  via gRPC      │
+                    └────────┬────────┘
+                             │
+                    ┌────────┴────────┐
+                    │                 │
+              Ping Success       Ping Failed
+                    │                 │
+                    ▼                 ▼
+         ┌──────────────────┐  ┌──────────────────┐
+         │ Set status=active│  │ Return Error     │
+         │ Reset failures=0 │  │ Agent stays      │
+         │ Update lastActive│  │ offline          │
+         └────────┬─────────┘  └──────────────────┘
+                  │
+                  ▼
+         ┌──────────────────┐
+         │ Resume Temporal  │
+         │ Schedule         │
+         └────────┬─────────┘
+                  │
+                  ▼
+         ┌──────────────────┐
+         │ Return Success   │
+         │ Agent is back    │
+         │ online           │
+         └──────────────────┘
+```
+
+### Agent Registration Flow (gRPC)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           Agent Connects via gRPC (RegisterAgent)               │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+                    ┌────────────────┐
+                    │ Validate API   │
+                    │ Key            │
+                    └────────┬────────┘
+                             │
+                    ┌────────┴────────┐
+                    │                 │
+              Agent Exists      New Agent
+                    │                 │
+                    ▼                 ▼
+         ┌──────────────────┐  ┌──────────────────┐
+         │ Update Agent     │  │ Create Agent     │
+         │ status=active    │  │ status=active    │
+         │ Reset failures=0 │  │ failures=0       │
+         └────────┬─────────┘  └────────┬─────────┘
+                  │                     │
+                  └──────────┬──────────┘
+                             │
+                             ▼
+                    ┌────────────────┐
+                    │ Was Previously │
+                    │ Inactive?      │
+                    └────────┬────────┘
+                             │
+                    ┌────────┴────────┐
+                    │                 │
+                   YES               NO
+                    │                 │
+                    ▼                 ▼
+         ┌──────────────────┐  ┌──────────┐
+         │ Start/Resume     │  │ Schedule │
+         │ Temporal Schedule│  │ Already  │
+         └──────────────────┘  │ Running  │
+                               └──────────┘
+```
+
 ### Orphan Job Detection Flow
 
 ```mermaid

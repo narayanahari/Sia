@@ -1,8 +1,4 @@
-import {
-  mockAgents,
-  supportedIntegrations,
-  mockActivityEvents,
-} from './mockData';
+import { supportedIntegrations, mockActivityEvents } from './mockData';
 import {
   client,
   getJobs,
@@ -28,6 +24,10 @@ import {
   postQueuesByQueueTypeResume,
   getQueuesByQueueTypeStatus,
   getJobsByIdLogs,
+  getAgents,
+  getAgentsById,
+  putAgentsById,
+  postAgents,
 } from '@sia/models/api-client';
 import type {
   Job,
@@ -37,6 +37,9 @@ import type {
   ApiKey,
   CreateApiKeyRequest,
   CreateApiKeyResponse,
+  Agent as GeneratedAgent,
+  CreateAgentRequest as GeneratedCreateAgentRequest,
+  UpdateAgentRequest as GeneratedUpdateAgentRequest,
 } from '@sia/models';
 import type { JobResponse } from '@/types';
 import type { Agent, Integration, ActivityEvent } from '@/types';
@@ -52,7 +55,6 @@ export type Repo = {
 };
 
 // In-memory store for demo purposes (for features not yet in API)
-const agents = [...mockAgents];
 const integrations = [...supportedIntegrations];
 const activityEvents = [...mockActivityEvents];
 
@@ -401,23 +403,230 @@ export const api = {
 
   // Agents
   async getAgents(): Promise<Agent[]> {
-    await delay(300);
-    return agents;
+    const headers = await getAuthHeaders();
+    const result = await getAgents({
+      headers,
+    });
+    const agents = (result.data as GeneratedAgent[]) || [];
+    return agents.map(agent => ({
+      id: agent.id,
+      name: agent.name,
+      status: agent.status,
+      config: {
+        ip: agent.ip || '',
+        host: agent.host || '',
+        port: agent.port,
+      },
+      lastActive: agent.last_active || new Date().toISOString(),
+      vibeConnectionId: (agent as any).vibe_connection_id,
+      vibeConnection: (agent as any).vibe_connection
+        ? {
+            id: (agent as any).vibe_connection.id,
+            name: (agent as any).vibe_connection.name,
+            providerType: (agent as any).vibe_connection.provider_type,
+          }
+        : undefined,
+      recentActivity: [],
+    }));
+  },
+
+  async getAgent(id: string): Promise<Agent | undefined> {
+    const headers = await getAuthHeaders();
+    try {
+      const result = await getAgentsById({
+        path: { id },
+        headers,
+      });
+      const agent = result.data as GeneratedAgent;
+      return {
+        id: agent.id,
+        name: agent.name,
+        status: agent.status,
+        config: {
+          ip: agent.ip || '',
+          host: agent.host || '',
+          port: agent.port,
+        },
+        lastActive: agent.last_active || new Date().toISOString(),
+        vibeConnectionId: (agent as any).vibe_connection_id,
+        vibeConnection: (agent as any).vibe_connection
+          ? {
+              id: (agent as any).vibe_connection.id,
+              name: (agent as any).vibe_connection.name,
+              providerType: (agent as any).vibe_connection.provider_type,
+            }
+          : undefined,
+        recentActivity: [],
+      };
+    } catch (error: any) {
+      if (error?.status === 404) {
+        return undefined;
+      }
+      throw error;
+    }
+  },
+
+  async createAgent(data: {
+    name: string;
+    host: string;
+    port: number;
+    ip?: string;
+    status?: 'active' | 'idle' | 'offline';
+    vibe_connection_id?: string;
+  }): Promise<Agent> {
+    const headers = await getAuthHeaders();
+    const requestBody: GeneratedCreateAgentRequest & {
+      vibe_connection_id?: string;
+    } = {
+      name: data.name,
+      host: data.host,
+      port: data.port,
+      ip: data.ip,
+      status: data.status,
+      vibe_connection_id: data.vibe_connection_id,
+    };
+    const result = await postAgents({
+      body: requestBody,
+      headers,
+    });
+    const agent = result.data as GeneratedAgent & {
+      vibe_connection_id?: string;
+      vibe_connection?: any;
+    };
+    return {
+      id: agent.id,
+      name: agent.name,
+      status: agent.status,
+      config: {
+        ip: agent.ip || '',
+        host: agent.host || '',
+        port: agent.port,
+      },
+      lastActive: agent.last_active || new Date().toISOString(),
+      vibeConnectionId: agent.vibe_connection_id,
+      vibeConnection: agent.vibe_connection
+        ? {
+            id: agent.vibe_connection.id,
+            name: agent.vibe_connection.name,
+            providerType: agent.vibe_connection.provider_type,
+          }
+        : undefined,
+      recentActivity: [],
+    };
+  },
+
+  async updateAgent(
+    id: string,
+    data: {
+      name?: string;
+      host?: string;
+      port?: number;
+      ip?: string;
+      status?: 'active' | 'idle' | 'offline';
+      vibe_connection_id?: string;
+    }
+  ): Promise<Agent> {
+    const headers = await getAuthHeaders();
+    const requestBody: GeneratedUpdateAgentRequest & {
+      vibe_connection_id?: string;
+    } = {
+      name: data.name,
+      host: data.host,
+      port: data.port,
+      ip: data.ip,
+      status: data.status,
+      vibe_connection_id: data.vibe_connection_id,
+    };
+    const result = await putAgentsById({
+      path: { id },
+      body: requestBody,
+      headers,
+    });
+    const agent = result.data as GeneratedAgent & {
+      vibe_connection_id?: string;
+      vibe_connection?: any;
+    };
+    return {
+      id: agent.id,
+      name: agent.name,
+      status: agent.status,
+      config: {
+        ip: agent.ip || '',
+        host: agent.host || '',
+        port: agent.port,
+      },
+      lastActive: agent.last_active || new Date().toISOString(),
+      vibeConnectionId: agent.vibe_connection_id,
+      vibeConnection: agent.vibe_connection
+        ? {
+            id: agent.vibe_connection.id,
+            name: agent.vibe_connection.name,
+            providerType: agent.vibe_connection.provider_type,
+          }
+        : undefined,
+      recentActivity: [],
+    };
   },
 
   async toggleAgentStatus(id: string): Promise<Agent | undefined> {
-    await delay(300);
-    const agent = agents.find(a => a.id === id);
-    if (agent) {
-      agent.status =
-        agent.status === 'active'
-          ? 'idle'
-          : agent.status === 'idle'
-          ? 'offline'
-          : 'active';
-      agent.lastActive = new Date().toISOString();
+    const agent = await this.getAgent(id);
+    if (!agent) {
+      return undefined;
     }
-    return agent;
+    const newStatus =
+      agent.status === 'active'
+        ? 'idle'
+        : agent.status === 'idle'
+        ? 'offline'
+        : 'active';
+    return this.updateAgent(id, { status: newStatus });
+  },
+
+  async reconnectAgent(
+    id: string
+  ): Promise<{ success: boolean; message: string; agent: Agent }> {
+    const headers = await getAuthHeaders();
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SIA_BACKEND_URL || 'http://localhost:3001';
+    const response = await fetch(`${baseUrl}/agents/${id}/reconnect`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to reconnect agent');
+    }
+    const data = await response.json();
+    const agent = data.agent as GeneratedAgent & {
+      vibe_connection_id?: string;
+      vibe_connection?: any;
+    };
+    return {
+      success: data.success,
+      message: data.message,
+      agent: {
+        id: agent.id,
+        name: agent.name,
+        status: agent.status,
+        config: {
+          ip: agent.ip || '',
+          host: agent.host || '',
+          port: agent.port,
+        },
+        lastActive: agent.last_active || new Date().toISOString(),
+        vibeConnectionId: agent.vibe_connection_id,
+        vibeConnection: agent.vibe_connection
+          ? {
+              id: agent.vibe_connection.id,
+              name: agent.vibe_connection.name,
+              providerType: agent.vibe_connection.provider_type,
+            }
+          : undefined,
+        recentActivity: [],
+      },
+    };
   },
 
   // Integrations

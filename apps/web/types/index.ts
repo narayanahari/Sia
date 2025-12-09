@@ -44,6 +44,12 @@ export interface Agent {
     port: number;
   };
   lastActive: string;
+  vibeConnectionId?: string;
+  vibeConnection?: {
+    id: string;
+    name: string;
+    providerType: string;
+  };
   recentActivity: Array<{
     id: string;
     action: string;

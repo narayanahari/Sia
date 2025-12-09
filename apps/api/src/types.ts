@@ -122,6 +122,7 @@ export interface CreateAgentRequest {
   port: number;
   ip?: string;
   status?: AgentStatus;
+  vibe_connection_id?: string;
 }
 
 export interface UpdateAgentRequest {
@@ -130,4 +131,5 @@ export interface UpdateAgentRequest {
   port?: number;
   ip?: string;
   status?: AgentStatus;
+  vibe_connection_id?: string;
 }

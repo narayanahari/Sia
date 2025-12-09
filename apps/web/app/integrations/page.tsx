@@ -158,10 +158,10 @@ export default function Integrations() {
   });
 
   const handleSaveApiKey = async () => {
-    if (!apiKeyIntegrationId || !apiKey.trim()) {
+    if (!apiKeyIntegrationId) {
       toast({
         title: 'Error',
-        description: 'Please enter a valid API key',
+        description: 'Integration ID is missing',
         variant: 'destructive',
       });
       return;
@@ -170,7 +170,7 @@ export default function Integrations() {
     if (!apiKeyName.trim()) {
       toast({
         title: 'Error',
-        description: 'Please enter a name/label for this API key',
+        description: 'Please enter a name/label for this integration',
         variant: 'destructive',
       });
       return;
@@ -181,7 +181,7 @@ export default function Integrations() {
       await api.storeIntegrationSecret({
         providerType: apiKeyIntegrationId,
         name: apiKeyName.trim(),
-        apiKey: apiKey.trim(),
+        apiKey: apiKey.trim() || '',
       });
 
       queryClient.invalidateQueries({ queryKey: ['integrations'] });
@@ -466,7 +466,7 @@ export default function Integrations() {
         return (
           <Image
             src="/icons/cursor.png"
-            alt="Cursor"
+            alt="Cursor Headless"
             width={24}
             height={24}
             className="h-6 w-6"
@@ -682,7 +682,9 @@ export default function Integrations() {
                 getIntegrationById(apiKeyIntegrationId)?.name}
             </DialogTitle>
             <DialogDescription>
-              Enter your API key to connect this integration
+              Enter your API key to connect this integration. If the headless
+              CLI agent for vibe coding is already authenticated on this
+              machine, you can leave the API key empty.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -704,13 +706,16 @@ export default function Integrations() {
             </div>
             <div className="space-y-2">
               <label htmlFor="api-key" className="text-sm font-medium">
-                API Key
+                API Key{' '}
+                <span className="text-muted-foreground font-normal">
+                  (Optional)
+                </span>
               </label>
               <div className="relative">
                 <Input
                   id="api-key"
                   type={showApiKey ? 'text' : 'password'}
-                  placeholder="Enter your API key"
+                  placeholder="Enter your API key (optional)"
                   value={apiKey}
                   onChange={e => setApiKey(e.target.value)}
                   disabled={savingApiKey}
@@ -730,6 +735,10 @@ export default function Integrations() {
                   )}
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                If the headless CLI agent is already signed in on your machine,
+                you can skip the API key.
+              </p>
             </div>
           </div>
           <DialogFooter>
@@ -747,7 +756,7 @@ export default function Integrations() {
             </Button>
             <Button
               onClick={handleSaveApiKey}
-              disabled={savingApiKey || !apiKey.trim() || !apiKeyName.trim()}
+              disabled={savingApiKey || !apiKeyName.trim()}
             >
               {savingApiKey ? 'Saving...' : 'Connect'}
             </Button>

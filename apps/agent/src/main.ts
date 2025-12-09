@@ -70,6 +70,9 @@ async function main() {
     backendClient.startStream(registrationResult.agentId, message => {
       if (message.messageType === BackendStreamMessageType.HEALTH_CHECK_PING) {
         backendClient.sendHeartbeat();
+        console.log(
+          'Heartbeat successfully sent in response to health check ping'
+        );
       } else if (
         message.messageType === BackendStreamMessageType.TASK_ASSIGNMENT
       ) {
@@ -77,10 +80,6 @@ async function main() {
         console.log('Received task assignment:', taskData);
       }
     });
-
-    setInterval(() => {
-      backendClient.sendHeartbeat();
-    }, 30000);
 
     process.on('SIGINT', async () => {
       console.log('\nShutting down server...');

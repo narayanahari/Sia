@@ -350,6 +350,7 @@ export const CreateAgentRequestSchema = Type.Object(
     port: Type.Number(),
     ip: Type.Optional(Type.String()),
     status: Type.Optional(AgentStatusSchema),
+    vibe_connection_id: Type.Optional(Type.String()),
   },
   { additionalProperties: false }
 );
@@ -361,6 +362,7 @@ export const UpdateAgentRequestSchema = Type.Object(
     port: Type.Optional(Type.Number()),
     ip: Type.Optional(Type.String()),
     status: Type.Optional(AgentStatusSchema),
+    vibe_connection_id: Type.Optional(Type.String()),
   },
   { additionalProperties: false }
 );
@@ -374,6 +376,14 @@ export const AgentSchema = Type.Object(
     ip: Type.Optional(Type.String()),
     host: Type.Optional(Type.String()),
     port: Type.Number(),
+    vibe_connection_id: Type.Optional(Type.String()),
+    vibe_connection: Type.Optional(
+      Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        provider_type: Type.String(),
+      })
+    ),
     last_active: Type.Optional(Type.String({ format: 'date-time' })),
     created_at: Type.String({ format: 'date-time' }),
     updated_at: Type.String({ format: 'date-time' }),

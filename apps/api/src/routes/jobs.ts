@@ -551,6 +551,7 @@ async function jobsRoutes(fastify: FastifyInstance) {
             priority: row.priority as Job['priority'],
             orderInQueue: row.order_in_queue as number,
             queueType: row.queue_type as 'rework' | 'backlog' | null,
+            agentId: row.agent_id as string | null,
             createdAt: new Date(row.created_at as string | number | Date),
             updatedAt: new Date(row.updated_at as string | number | Date),
             createdBy: row.created_by as string,

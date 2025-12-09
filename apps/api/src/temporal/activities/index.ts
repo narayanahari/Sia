@@ -10,3 +10,4 @@ export * from './ping-agent-via-stream-activity';
 export * from './update-agent-status-activity';
 export * from './pause-agent-schedules-activity';
 export * from './log-to-job-activity';
+export * from './preprocess-activity';

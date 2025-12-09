@@ -450,6 +450,7 @@ export type CreateAgentRequest = {
   port: number;
   ip?: string;
   status?: 'active' | 'idle' | 'offline';
+  vibe_connection_id?: string;
 };
 
 export type UpdateAgentRequest = {
@@ -458,6 +459,7 @@ export type UpdateAgentRequest = {
   port?: number;
   ip?: string;
   status?: 'active' | 'idle' | 'offline';
+  vibe_connection_id?: string;
 };
 
 export type Agent = {
@@ -468,6 +470,12 @@ export type Agent = {
   ip?: string;
   host?: string;
   port: number;
+  vibe_connection_id?: string;
+  vibe_connection?: {
+    id: string;
+    name: string;
+    provider_type: string;
+  };
   last_active?: string;
   created_at: string;
   updated_at: string;

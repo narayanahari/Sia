@@ -4,6 +4,8 @@ import type {
   LogMessage,
   HintJobResponse,
   CancelJobResponse,
+  HealthCheckRequest,
+  HealthCheckResponse,
 } from '@sia/models/proto';
 import { AgentServiceClient } from '@sia/models/proto';
 
@@ -207,6 +209,29 @@ export class AgentClient {
           } else {
             console.log(
               `[AgentClient] cleanupWorkspace success for jobId=${jobId}`
+            );
+            resolve(response);
+          }
+        }
+      );
+    });
+  }
+
+  async healthCheck(agentId: string): Promise<HealthCheckResponse> {
+    console.log(`[AgentClient] healthCheck called for agentId=${agentId}`);
+    return new Promise((resolve, reject) => {
+      const request: HealthCheckRequest = { agentId };
+      this.client.healthCheck(
+        request,
+        (error: grpc.ServiceError | null, response: HealthCheckResponse) => {
+          if (error) {
+            console.error(
+              `[AgentClient] healthCheck error for agentId=${agentId}: code=${error.code}, message=${error.message}`
+            );
+            reject(error);
+          } else {
+            console.log(
+              `[AgentClient] healthCheck success for agentId=${agentId}: success=${response.success}`
             );
             resolve(response);
           }

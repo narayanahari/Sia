@@ -3,6 +3,7 @@ import { eq, and } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import type { NewAgent } from '../db/index';
+import { queueWorkflowService } from './queue-workflow-service';
 
 function hashApiKey(apiKey: string): string {
   return crypto.createHash('sha256').update(apiKey).digest('hex');
@@ -63,6 +64,8 @@ export async function registerAgent(
   if (existingAgents.length > 0) {
     // Agent exists - update it with current connection info
     const agent = existingAgents[0];
+    const previousStatus = agent.status;
+
     await db
       .update(schema.agents)
       .set({
@@ -75,6 +78,18 @@ export async function registerAgent(
         updatedAt: now,
       })
       .where(eq(schema.agents.id, agent.id));
+
+    // If agent was not active before, start/resume the schedule
+    if (previousStatus !== 'active') {
+      try {
+        await queueWorkflowService.startAgentSchedules(agent.id);
+      } catch (error) {
+        console.warn(
+          `Failed to start schedule for agent ${agent.id} during registration:`,
+          error
+        );
+      }
+    }
 
     return {
       agentId: agent.id,
@@ -100,6 +115,16 @@ export async function registerAgent(
     };
 
     await db.insert(schema.agents).values(newAgent);
+
+    // Create schedule for the new agent
+    try {
+      await queueWorkflowService.startAgentSchedules(agentId);
+    } catch (error) {
+      console.warn(
+        `Failed to start schedule for new agent ${agentId} during registration:`,
+        error
+      );
+    }
 
     return {
       agentId,

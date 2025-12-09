@@ -8,6 +8,8 @@ import {
   LogMessage,
   HintJobResponse,
   CancelJobResponse,
+  HealthCheckRequest,
+  HealthCheckResponse,
 } from '@sia/models';
 
 // TODO: These types will be available after proto regeneration
@@ -154,6 +156,26 @@ class AgentServer {
       }
     };
 
+    const healthCheck: grpc.handleUnaryCall<
+      HealthCheckRequest,
+      HealthCheckResponse
+    > = async (call, callback) => {
+      try {
+        const request = call.request;
+        const response: HealthCheckResponse = {
+          success: true,
+          timestamp: Date.now(),
+          version: '1.0.0',
+        };
+        callback(null, response);
+      } catch (error) {
+        callback({
+          code: grpc.status.INTERNAL,
+          message: error instanceof Error ? error.message : 'Unknown error',
+        } as grpc.ServiceError);
+      }
+    };
+
     const serviceImplementation: AgentServiceServer = {
       executeJob,
       hintJob,
@@ -161,6 +183,7 @@ class AgentServer {
       runVerification,
       createPR: createPR as any, // Proto generates createPr, but we use createPR
       cleanupWorkspace,
+      healthCheck,
     } as any;
 
     this.server.addService(AgentServiceService, serviceImplementation);

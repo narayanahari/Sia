@@ -199,6 +199,10 @@ export class BackendGrpcServer {
                   updatedAt: new Date(),
                 })
                 .where(eq(schema.agents.id, agentId));
+
+              console.log(
+                `Heartbeat request successfully acked for agent ${agentId}`
+              );
             }
           }
         } catch (error) {

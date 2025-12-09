@@ -138,9 +138,22 @@ apps/api/src/
 ├── temporal/            # Workflows & activities
 ├── grpc/                # gRPC server
 ├── db/                  # Database schema & migrations
+├── schemas/             # OpenAPI/TypeBox schemas for request/response validation
 ├── middleware/          # Auth, validation
 └── main.ts              # Entry point
 ```
+
+## API Schema Updates
+
+When adding or modifying API endpoints:
+
+1. **Update schemas** in `apps/api/src/schemas/index.ts` using TypeBox
+2. **Build the API** to regenerate OpenAPI spec: `npx nx run api:build`
+3. **Regenerate API client** for frontend: `npm run generate -w @sia/models`
+
+The generated API client will be available in `libs/models/src/generated/api-client/` and automatically used by the frontend.
+
+**Important:** Never manually edit files in the `generated` folder - they will be overwritten on the next generation run.
 
 ## Build Verification
 
