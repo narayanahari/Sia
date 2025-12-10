@@ -1879,11 +1879,11 @@
             "type": "string"
           },
           "apiKey": {
-            "description": "The API key to store",
+            "description": "The API key to store (optional if agent is already authenticated)",
             "type": "string"
           }
         },
-        "required": ["providerType", "name", "apiKey"]
+        "required": ["providerType", "name"]
       },
       "StoreIntegrationSecretResponse": {
         "additionalProperties": false,
@@ -1941,6 +1941,9 @@
                 "enum": ["encrypted_local"]
               }
             ]
+          },
+          "hasApiKey": {
+            "type": "boolean"
           },
           "createdAt": {
             "format": "date-time",

@@ -25,6 +25,7 @@ import {
   Plus,
   ExternalLink,
   RefreshCw,
+  AlertTriangle,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -306,18 +307,24 @@ export default function AgentsPage() {
                     {agent.name}
                   </CardTitle>
                   <StatusBadge status={agent.status} />
+                  {(!agent.vibeConnection ||
+                    !agent.vibeConnection.id ||
+                    !agent.vibeConnection.name) && (
+                    <div className="flex items-center gap-2 text-sm text-destructive mt-1">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span>Not attached to a vibe coding agent</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-2">
-                  {agent.status === 'offline' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => reconnectMutation.mutate(agent.id)}
-                      disabled={reconnectMutation.isPending}
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => reconnectMutation.mutate(agent.id)}
+                    disabled={reconnectMutation.isPending}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"

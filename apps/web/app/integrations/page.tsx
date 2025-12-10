@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
-import { ExternalLink, Eye, EyeOff } from 'lucide-react';
+import { ExternalLink, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -25,6 +25,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthInfo } from '@propelauth/react';
 import type { RepoProvider } from '@sia/models';
 
@@ -86,6 +87,7 @@ export default function Integrations() {
     providerType: string;
     name: string;
     storageType: 'gcp' | 'encrypted_local';
+    hasApiKey?: boolean;
     createdAt: string;
     updatedAt: string;
   }
@@ -181,7 +183,7 @@ export default function Integrations() {
       await api.storeIntegrationSecret({
         providerType: apiKeyIntegrationId,
         name: apiKeyName.trim(),
-        apiKey: apiKey.trim() || '',
+        apiKey: apiKey.trim() || undefined,
       });
 
       queryClient.invalidateQueries({ queryKey: ['integrations'] });
@@ -193,14 +195,23 @@ export default function Integrations() {
       setApiKeyIntegrationId(null);
 
       toast({
-        title: 'API key saved',
-        description: 'Your API key has been saved successfully',
+        title: 'Connection created',
+        description: 'Your connection is created successfully',
       });
     } catch (error) {
+      let errorMessage = 'Failed to create connection';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (
+        typeof error === 'object' &&
+        error !== null &&
+        'error' in error
+      ) {
+        errorMessage = String((error as { error: unknown }).error);
+      }
       toast({
         title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to save API key',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -551,11 +562,20 @@ export default function Integrations() {
             {integration.description}
           </CardDescription>
           {isVibePlatform && isConnected && integrationSecret && (
-            <div className="text-sm space-y-1 pt-2 border-t">
+            <div className="text-sm space-y-2 pt-2 border-t">
               <p className="text-muted-foreground">
-                Connected key:{' '}
+                Connected to:{' '}
                 <span className="font-medium">{integrationSecret.name}</span>
               </p>
+              {integrationSecret.hasApiKey === false && (
+                <Alert variant="destructive" className="py-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    No API key in the connection. Ensure that the vibe agent is
+                    authenticated on your dev machine.
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           )}
           {isGitHub && isConnected && githubProvider && (
@@ -736,8 +756,8 @@ export default function Integrations() {
                 </button>
               </div>
               <p className="text-xs text-muted-foreground">
-                If the headless CLI agent is already signed in on your machine,
-                you can skip the API key.
+                If the vibe coding agent is already signed in on your machine,
+                you can skip the API key input.
               </p>
             </div>
           </div>

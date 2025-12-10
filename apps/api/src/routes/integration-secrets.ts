@@ -88,9 +88,9 @@ async function integrationSecretsRoutes(fastify: FastifyInstance) {
         const user = request.user!;
         const { providerType, name, apiKey } = request.body;
 
-        if (!providerType || !name || !apiKey) {
+        if (!providerType || !name) {
           return reply.code(400).send({
-            error: 'providerType, name, and apiKey are required',
+            error: 'providerType and name are required',
           });
         }
 
@@ -104,12 +104,18 @@ async function integrationSecretsRoutes(fastify: FastifyInstance) {
           });
         }
 
+        // Normalize apiKey to empty string if not provided
+        const normalizedApiKey = apiKey || '';
+        const hasApiKey = Boolean(apiKey && apiKey.trim().length > 0);
+
         // Generate a unique secret ID
         const secretId = uuidv4();
 
         // Store the secret using the secret storage service
+        // If apiKey is empty, we still create the integration record
+        // (the agent may already be authenticated on the user's machine)
         const { storedValue, storageType } =
-          await secretStorageService.storeSecret(secretId, apiKey);
+          await secretStorageService.storeSecret(secretId, normalizedApiKey);
 
         // Create integration record in database
         const integrationId = uuidv4();
@@ -122,6 +128,7 @@ async function integrationSecretsRoutes(fastify: FastifyInstance) {
           metadata: {
             secretStorageType: storageType,
             secretId,
+            hasApiKey,
           },
         };
 
@@ -244,11 +251,13 @@ async function integrationSecretsRoutes(fastify: FastifyInstance) {
             | undefined;
 
           if (storageType && integration.accessToken) {
+            const hasApiKey = metadata?.hasApiKey as boolean | undefined;
             results.push({
               id: integration.id,
               providerType: integration.providerType,
               name: integration.name,
               storageType,
+              hasApiKey,
               createdAt: integration.createdAt.toISOString(),
               updatedAt: integration.updatedAt.toISOString(),
             });
@@ -377,11 +386,13 @@ async function integrationSecretsRoutes(fastify: FastifyInstance) {
           storageType
         );
 
+        const hasApiKey = metadata?.hasApiKey as boolean | undefined;
         const response: GetIntegrationSecretResponseType = {
           id: integration.id,
           providerType: integration.providerType,
           name: integration.name,
           storageType,
+          hasApiKey,
           createdAt: integration.createdAt.toISOString(),
           updatedAt: integration.updatedAt.toISOString(),
         };

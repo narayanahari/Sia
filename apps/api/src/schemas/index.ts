@@ -405,7 +405,12 @@ export const StoreIntegrationSecretRequestSchema = Type.Object(
     name: Type.String({
       description: 'A short description/label to help identify the key',
     }),
-    apiKey: Type.String({ description: 'The API key to store' }),
+    apiKey: Type.Optional(
+      Type.String({
+        description:
+          'The API key to store (optional if agent is already authenticated)',
+      })
+    ),
   },
   { additionalProperties: false }
 );
@@ -427,6 +432,7 @@ export const GetIntegrationSecretResponseSchema = Type.Object(
     providerType: Type.String(),
     name: Type.String(),
     storageType: SecretStorageTypeSchema,
+    hasApiKey: Type.Optional(Type.Boolean()),
     createdAt: Type.String({ format: 'date-time' }),
     updatedAt: Type.String({ format: 'date-time' }),
   },

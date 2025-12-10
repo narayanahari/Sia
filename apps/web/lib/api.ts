@@ -1113,7 +1113,7 @@ export const api = {
   async storeIntegrationSecret(data: {
     providerType: string;
     name: string;
-    apiKey: string;
+    apiKey?: string;
   }): Promise<{
     id: string;
     providerType: string;
@@ -1126,6 +1126,18 @@ export const api = {
       body: data,
       headers,
     });
+
+    if (result.error) {
+      const errorMessage =
+        (result.error as { error?: string })?.error ||
+        'Failed to store integration secret';
+      throw new Error(errorMessage);
+    }
+
+    if (!result.data) {
+      throw new Error('Invalid response from API: missing data');
+    }
+
     return result.data as {
       id: string;
       providerType: string;

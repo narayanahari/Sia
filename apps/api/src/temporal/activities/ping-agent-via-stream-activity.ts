@@ -36,7 +36,7 @@ export async function pingAgentViaStream(params: {
           () =>
             reject(
               new Error(
-                'Unable to establish the connection. Please check if the agent is running in the host machine in the port configured.'
+                'Unable to establish the connection. Please check if the agent is running in the host machine and its reachable.'
               )
             ),
           10000
@@ -71,7 +71,7 @@ export async function pingAgentViaStream(params: {
       return {
         success: false,
         error:
-          'Unable to establish the connection. Please check if the agent is running in the host machine in the port configured.',
+          'Unable to establish the connection. Please check if the agent is running in the host machine and its reachable.',
       };
     }
   } catch (error) {
@@ -88,7 +88,7 @@ export async function pingAgentViaStream(params: {
     return {
       success: false,
       error:
-        'Unable to establish the connection. Please check if the agent is running in the host machine in the port configured.',
+        'Unable to establish the connection. Please check if the agent is running in the host machine and its reachable.',
     };
   } finally {
     // Close the stateless connection

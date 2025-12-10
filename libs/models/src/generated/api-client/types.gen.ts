@@ -491,9 +491,9 @@ export type StoreIntegrationSecretRequest = {
    */
   name: string;
   /**
-   * The API key to store
+   * The API key to store (optional if agent is already authenticated)
    */
-  apiKey: string;
+  apiKey?: string;
 };
 
 export type StoreIntegrationSecretResponse = {
@@ -509,6 +509,7 @@ export type GetIntegrationSecretResponse = {
   providerType: string;
   name: string;
   storageType: 'gcp' | 'encrypted_local';
+  hasApiKey?: boolean;
   createdAt: string;
   updatedAt: string;
 };
