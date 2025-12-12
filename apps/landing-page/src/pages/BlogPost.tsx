@@ -45,6 +45,31 @@ const portableTextComponents = {
         </figure>
       );
     },
+    table: ({ value }: any) => {
+      // Render table with scrollable container for mobile
+      return (
+        <div className="table-scroll-container">
+          <table className="border-collapse my-4 text-white/80 w-full">
+            {value.rows?.map((row: any, rowIndex: number) => (
+              <tr key={rowIndex}>
+                {row.cells?.map((cell: any, cellIndex: number) => {
+                  const Tag = rowIndex === 0 ? 'th' : 'td';
+                  const className =
+                    rowIndex === 0
+                      ? 'border border-gray-600 px-3 py-2 bg-gray-800 font-bold text-blue-300'
+                      : 'border border-gray-600 px-3 py-2 text-white/80';
+                  return (
+                    <Tag key={cellIndex} className={className}>
+                      {cell}
+                    </Tag>
+                  );
+                })}
+              </tr>
+            ))}
+          </table>
+        </div>
+      );
+    },
   },
   block: {
     normal: ({ children }: any) => (

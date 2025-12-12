@@ -527,10 +527,38 @@ body {
   margin-top: 0.5rem;
 }
 
+/* Table scroll container for mobile responsiveness */
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+}
+
+/* Show scrollbar on mobile for better UX */
+.table-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
 .markdown-content table {
   margin: 1rem auto;
   border-collapse: collapse;
   color: rgba(255, 255, 255, 0.8);
+  min-width: 100%;
 }
 
 .markdown-content th,

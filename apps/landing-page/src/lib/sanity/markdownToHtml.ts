@@ -44,8 +44,9 @@ export function markdownToHtml(markdown: string): string {
     )
     .replace(
       /<table>/g,
-      '<table class="border-collapse my-4 text-white/80 w-full">'
+      '<div class="table-scroll-container"><table class="border-collapse my-4 text-white/80 w-full">'
     )
+    .replace(/<\/table>/g, '</table></div>')
     .replace(
       /<th>/g,
       '<th class="border border-gray-600 px-3 py-2 bg-gray-800 font-bold text-blue-300">'
