@@ -93,15 +93,22 @@ export default function BlogPost() {
       }
 
       try {
+        console.log('[BlogPost] Loading post with slug:', slug);
         const loadedPost = await getEngineeringBlogPost(slug);
+        console.log('[BlogPost] Loaded post:', loadedPost);
         if (!loadedPost) {
-          setError('Blog post not found');
+          console.warn('[BlogPost] Post not found for slug:', slug);
+          setError(`Blog post not found for slug: ${slug}`);
         } else {
           setPost(loadedPost);
         }
       } catch (err) {
-        console.error('Error loading blog post:', err);
-        setError('Failed to load blog post');
+        console.error('[BlogPost] Error loading blog post:', err);
+        setError(
+          `Failed to load blog post: ${
+            err instanceof Error ? err.message : 'Unknown error'
+          }`
+        );
       } finally {
         setLoading(false);
       }

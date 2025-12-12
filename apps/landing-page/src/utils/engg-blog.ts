@@ -174,17 +174,27 @@ export async function getEngineeringBlogPost(
   slug: string
 ): Promise<EngineeringBlogPost | null> {
   try {
+    console.log('[getEngineeringBlogPost] Fetching post with slug:', slug);
+    console.log('[getEngineeringBlogPost] Using query:', postQuery);
     const sanityPost = await client.fetch<SanityPost | null>(postQuery, {
       slug,
     });
 
+    console.log('[getEngineeringBlogPost] Sanity response:', sanityPost);
+
     if (!sanityPost) {
+      console.warn('[getEngineeringBlogPost] No post found for slug:', slug);
       return null;
     }
 
-    return convertSanityPostToBlogPost(sanityPost);
+    const converted = convertSanityPostToBlogPost(sanityPost);
+    console.log('[getEngineeringBlogPost] Converted post:', converted);
+    return converted;
   } catch (error) {
-    console.error(`Error loading engineering blog ${slug} from Sanity:`, error);
+    console.error(
+      `[getEngineeringBlogPost] Error loading blog ${slug}:`,
+      error
+    );
     return null;
   }
 }
