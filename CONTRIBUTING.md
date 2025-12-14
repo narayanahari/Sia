@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to Sia! This document provides guidelines and instructions for contributing to the project.
 
+Test PR, to be ignored.
+
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
